@@ -1,0 +1,48 @@
+module fpdecoder(
+    input  logic [31:0] Instr,
+
+    output logic        IsFPInstr,
+
+    output logic [3:0]  FPA1,
+    output logic [3:0]  FPA2,
+    output logic [3:0]  FPA3,
+
+    output logic        FPRegWrite,
+    output logic [1:0]  FPWriteSrc,
+
+    output logic [1:0]  FPOp,
+    output logic        ConvOp,
+
+    output logic [3:0]  IntRegFP,
+
+    output logic [1:0]  RA1Src,
+    output logic [1:0]  WriteRegSrc,
+    output logic [1:0]  IntWriteSrc,
+    output logic        FPToIntSrc
+);
+
+    always_comb begin
+        // Valores por defecto: instrucción NO flotante
+        IsFPInstr   = 1'b0;
+
+        FPA1        = 4'b0000;
+        FPA2        = 4'b0000;
+        FPA3        = 4'b0000;
+
+        FPRegWrite  = 1'b0;
+        FPWriteSrc  = 2'b00;
+
+        FPOp        = 2'b00;
+        ConvOp      = 1'b0;
+
+        IntRegFP    = 4'b0000;
+
+        RA1Src      = 2'b00;
+        WriteRegSrc = 2'b00;
+        IntWriteSrc = 2'b00;
+        FPToIntSrc  = 1'b0;
+
+        // Aquí después agregamos los patrones reales de VMOV, VCVT, VADD, etc.
+    end
+
+endmodule

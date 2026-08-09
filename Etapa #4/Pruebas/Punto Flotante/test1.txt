@@ -1,0 +1,7 @@
+Ninguno	0	Ninguna	—	0000000000
+SW0	1	R8 = 5 → S0 → R9	R9 = 5	0000000001
+SW1	2	R8 = 9 → S1 → R9	R9 = 9	0000000010
+SW2	4	R8 = 0x12345678 → S2 → R9	R9 = 0x12345678	0000000100
+SW3	8	R8 = 0xFFFFFFFC → S3 → R9	R9 = 0xFFFFFFFC	0000001000
+Cualquier otro	distinto	Sin prueba	—	0000000000
+Fallo interno	—	VMOV no copió bien	—	1111111111

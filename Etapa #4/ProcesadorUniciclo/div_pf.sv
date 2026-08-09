@@ -1,0 +1,153 @@
+module div_pf (
+	input  logic [31:0] A,
+	input  logic [31:0] B,
+	output logic [31:0] C
+);
+
+	logic signoA, signoB, signoR;
+	logic [7:0] exponenteA, exponenteB, exponenteR;
+	logic [23:0] mantisaA, mantisaB;
+	logic [47:0] mantisa_div;
+	logic [22:0] fraccionR;
+	logic signed [9:0] exponente_aux;
+	logic signed [9:0] exponente_realA, exponente_realB;
+	logic es_ceroA, es_ceroB, es_infA, es_infB, es_nanA, es_nanB, es_subA, es_subB;
+	logic [4:0] indice_msbA, indice_msbB;
+	logic [4:0] desplazamientoA, desplazamientoB;
+	logic [23:0] mantisaA_norm, mantisaB_norm; 
+	
+	always_comb begin
+		signoA = A[31];
+		signoB = B[31];
+		exponenteA = A[30:23];
+		exponenteB = B[30:23];
+
+		es_ceroA = (A[30:0] == 31'd0);
+		es_ceroB = (B[30:0] == 31'd0);
+		es_infA = (exponenteA == 8'hFF) && (A[22:0] == 23'd0);
+		es_infB = (exponenteB == 8'hFF) && (B[22:0] == 23'd0);
+		es_nanA = (exponenteA == 8'hFF) && (A[22:0] != 23'd0);
+		es_nanB = (exponenteB == 8'hFF) && (B[22:0] != 23'd0);
+		es_subA = (exponenteA == 8'd0) && (A[22:0] != 23'd0);
+		es_subB = (exponenteB == 8'd0) && (B[22:0] != 23'd0);
+
+		mantisaA = (exponenteA == 0) ? {1'b0, A[22:0]} : {1'b1, A[22:0]};
+		mantisaB = (exponenteB == 0) ? {1'b0, B[22:0]} : {1'b1, B[22:0]};
+
+		casez (mantisaA)
+			24'b1???????????????????????: indice_msbA = 5'd23;
+			24'b01??????????????????????: indice_msbA = 5'd22;
+			24'b001?????????????????????: indice_msbA = 5'd21;
+			24'b0001????????????????????: indice_msbA = 5'd20;
+			24'b00001???????????????????: indice_msbA = 5'd19;
+			24'b000001??????????????????: indice_msbA = 5'd18;
+			24'b0000001?????????????????: indice_msbA = 5'd17;
+			24'b00000001????????????????: indice_msbA = 5'd16;
+			24'b000000001???????????????: indice_msbA = 5'd15;
+			24'b0000000001??????????????: indice_msbA = 5'd14;
+			24'b00000000001?????????????: indice_msbA = 5'd13;
+			24'b000000000001????????????: indice_msbA = 5'd12;
+			24'b0000000000001???????????: indice_msbA = 5'd11;
+			24'b00000000000001??????????: indice_msbA = 5'd10;
+			24'b000000000000001?????????: indice_msbA = 5'd9;
+			24'b0000000000000001????????: indice_msbA = 5'd8;
+			24'b00000000000000001???????: indice_msbA = 5'd7;
+			24'b000000000000000001??????: indice_msbA = 5'd6;
+			24'b0000000000000000001?????: indice_msbA = 5'd5;
+			24'b00000000000000000001????: indice_msbA = 5'd4;
+			24'b000000000000000000001???: indice_msbA = 5'd3;
+			24'b0000000000000000000001??: indice_msbA = 5'd2;
+			24'b00000000000000000000001?: indice_msbA = 5'd1;
+			24'b000000000000000000000001: indice_msbA = 5'd0;
+			default: indice_msbA = 5'd0;
+		endcase
+
+		casez (mantisaB)
+			24'b1???????????????????????: indice_msbB = 5'd23;
+			24'b01??????????????????????: indice_msbB = 5'd22;
+			24'b001?????????????????????: indice_msbB = 5'd21;
+			24'b0001????????????????????: indice_msbB = 5'd20;
+			24'b00001???????????????????: indice_msbB = 5'd19;
+			24'b000001??????????????????: indice_msbB = 5'd18;
+			24'b0000001?????????????????: indice_msbB = 5'd17;
+			24'b00000001????????????????: indice_msbB = 5'd16;
+			24'b000000001???????????????: indice_msbB = 5'd15;
+			24'b0000000001??????????????: indice_msbB = 5'd14;
+			24'b00000000001?????????????: indice_msbB = 5'd13;
+			24'b000000000001????????????: indice_msbB = 5'd12;
+			24'b0000000000001???????????: indice_msbB = 5'd11;
+			24'b00000000000001??????????: indice_msbB = 5'd10;
+			24'b000000000000001?????????: indice_msbB = 5'd9;
+			24'b0000000000000001????????: indice_msbB = 5'd8;
+			24'b00000000000000001???????: indice_msbB = 5'd7;
+			24'b000000000000000001??????: indice_msbB = 5'd6;
+			24'b0000000000000000001?????: indice_msbB = 5'd5;
+			24'b00000000000000000001????: indice_msbB = 5'd4;
+			24'b000000000000000000001???: indice_msbB = 5'd3;
+			24'b0000000000000000000001??: indice_msbB = 5'd2;
+			24'b00000000000000000000001?: indice_msbB = 5'd1;
+			24'b000000000000000000000001: indice_msbB = 5'd0;
+			default: indice_msbB = 5'd0;
+		endcase
+
+		desplazamientoA = 5'd23 - indice_msbA;
+		desplazamientoB = 5'd23 - indice_msbB;
+
+		mantisaA_norm = es_subA ? 24'd0 : mantisaA;
+		mantisaB_norm = es_subB ? 24'd0 : mantisaB;
+
+		exponente_realA = (exponenteA == 0) ? 10'd1 : $signed({2'b00, exponenteA});
+		exponente_realB = (exponenteB == 0) ? 10'd1 : $signed({2'b00, exponenteB});
+
+		signoR = signoA ^ signoB;
+		exponenteR = 8'd0;
+		mantisa_div = 48'd0;
+		fraccionR = 23'd0;
+		exponente_aux = 10'd0;
+		C = 32'd0;
+
+		if (es_nanA || es_nanB) begin
+			C = {1'b0, 8'hFF, 23'h400000};
+		end
+		else if ((es_ceroA && es_ceroB) || (es_infA && es_infB)) begin
+			C = {1'b0, 8'hFF, 23'h400000};
+		end
+		else if (es_infA) begin
+			C = {signoR, 8'hFF, 23'd0};
+		end
+		else if (es_infB) begin
+			C = {signoR, 31'd0};
+		end
+		else if (es_ceroA) begin
+			C = {signoR, 31'd0};
+		end
+		else if (es_ceroB) begin
+			C = {signoR, 8'hFF, 23'd0};
+		end
+		else begin
+			mantisa_div = ({24'd0, mantisaA_norm} << 23) / mantisaB_norm;
+			exponente_aux = exponente_realA - exponente_realB + 10'd127;
+
+			if (mantisa_div[23]) begin
+				fraccionR = mantisa_div[22:0];
+			end
+			else begin
+				mantisa_div = mantisa_div << 1;
+				exponente_aux = exponente_aux - 10'd1;
+				fraccionR = mantisa_div[22:0];
+			end
+
+			if (exponente_aux >= 10'd255) begin
+				C = {signoR, 8'hFF, 23'd0};
+			end
+			else if (exponente_aux <= 10'd0) begin
+				C = {signoR, 31'd0};
+			end
+			else begin
+				exponenteR = exponente_aux[7:0];
+				C = {signoR, exponenteR, fraccionR};
+			end
+		end
+	end
+
+endmodule

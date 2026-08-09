@@ -1,0 +1,5 @@
+SW0	MOV con inmediatos	0101010101
+SW1	MOV de registro a registro	1010101010
+SW2	MOV mixto: inmediato y registro	0011110000
+SW3	MOV con registro desplazado	1100001111
+SW4 a SW9	Sin prueba	0000000000

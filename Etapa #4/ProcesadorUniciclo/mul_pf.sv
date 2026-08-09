@@ -1,0 +1,57 @@
+module mul_pf(
+    input  logic [31:0] A,
+    input  logic [31:0] B,
+    output logic [31:0] C
+);
+
+    logic signA, signB, signR;
+    logic [7:0] exponentA, exponentB, exponentR;
+    logic [23:0] mantissaA, mantissaB;
+    logic [47:0] mantissa_mult;
+    logic [22:0] fractionR;
+
+    always_comb begin
+        signA = A[31];
+        signB = B[31];
+        exponentA = A[30:23];
+        exponentB = B[30:23];
+
+        mantissaA = (exponentA == 0) ? {1'b0, A[22:0]} : {1'b1, A[22:0]};
+        mantissaB = (exponentB == 0) ? {1'b0, B[22:0]} : {1'b1, B[22:0]};
+
+        signR = signA ^ signB;
+        exponentR = 8'd0;
+        mantissa_mult = 48'd0;
+        fractionR = 23'd0;
+        C = 32'd0;
+
+        // Manejo de NaN
+        if ((A[30:23] == 8'hFF && A[22:0] != 23'd0) || (B[30:23] == 8'hFF && B[22:0] != 23'd0)) begin
+            C = {1'b1, 8'hFF, 23'd0}; 
+        end
+        // Manejo de infinito
+        else if ((A[30:23] == 8'hFF && A[22:0] == 23'd0) || (B[30:23] == 8'hFF && B[22:0] == 23'd0)) begin
+            C = {signR, 8'hFF, 23'd0}; // Inf
+        end
+        // Manejo de inf * 0
+        else if (((A[30:23] == 8'hFF && A[22:0] == 23'd0) && (B[30:23] == 8'd0 && B[22:0] == 23'd0)) || 
+                 ((B[30:23] == 8'hFF && B[22:0] == 23'd0) && (A[30:23] == 8'd0 && A[22:0] == 23'd0))) begin
+            C = {1'b1, 8'hFF, 23'd0}; // NaN
+        end
+        else begin
+            mantissa_mult = mantissaA * mantissaB;
+            exponentR = exponentA + exponentB - 8'd127;
+
+            if (mantissa_mult[47]) begin
+                exponentR = exponentR + 8'd1;
+                fractionR = mantissa_mult[46:24];
+            end
+            else begin
+                fractionR = mantissa_mult[45:23];
+            end
+
+            C = {signR, exponentR, fractionR};
+        end
+    end
+
+endmodule

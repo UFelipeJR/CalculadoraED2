@@ -1,0 +1,16 @@
+module driver_lcd #(
+    parameter int TOPVALUE = 50_000_000
+)(
+    input  logic        clk,
+	 input  logic        rst,
+    input  logic [3:0]  COLUMNAS, 
+    output logic [3:0]  FILAS,     
+    output logic [3:0]  TECLA,     
+    output logic        FLAG,      
+    output logic [7:0]  DISP      
+);
+
+
+	 
+  
+endmodule

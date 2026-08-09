@@ -1,0 +1,4 @@
+Ninguno	0000000000	Ninguna	—	—	0000000000
+SW0	0000000001	MOV inmediato	R8 = 7	compara con 8	0000000001
+SW1	0000000010	MOV registro	R9 = 9	compara con 10	0000000010
+SW2 a SW9	distinto de 1 o 2	Ninguna	—	—	0000000000

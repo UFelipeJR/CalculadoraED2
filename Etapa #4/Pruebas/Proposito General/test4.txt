@@ -1,0 +1,4 @@
+Prueba fallida intencional	SW0	0000000001	Hace 1 + 1 = 2, pero compara contra 3	0000000001
+Otros switches	SW1	0000000010	No entra a la prueba	0000000000
+Otros switches	SW2	0000000100	No entra a la prueba	0000000000
+Otros switches	SW3 a SW9	Distinto de 1	No entra a la prueba	0000000000

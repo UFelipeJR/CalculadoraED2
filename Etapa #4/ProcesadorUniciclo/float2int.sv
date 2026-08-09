@@ -1,0 +1,39 @@
+module float2int(
+    input logic [31:0] A,
+    output logic [31:0] C
+);
+
+    logic sign;
+    logic [7:0] expo;
+    logic [23:0] mantissa;
+    logic signed [31:0] shift;
+    
+    always_comb begin
+        sign = A[31];
+        expo = A[30:23];
+        mantissa = {1'b1, A[22:0]};
+        shift = expo - 127 - 23;
+        
+        if (expo == 0 && A[22:0] == 23'd0) begin
+            C = 0;
+        end
+        else if (expo == 8'hFF && A[22:0] == 23'd0) begin
+            C = 32'h7FFFFFFF;
+        end
+        else if (expo == 8'hFF && A[22:0] != 23'd0) begin
+            C = 32'h80000000;
+        end
+        else if (expo == 0 && A[22:0] != 23'd0) begin
+            C = 0;
+        end
+        else if (shift >= 0) begin
+            C = mantissa << shift;
+        end else begin
+            C = mantissa >> (-shift);
+        end
+        
+        if (sign)
+            C = -C;
+    end
+
+endmodule
